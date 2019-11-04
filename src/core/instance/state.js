@@ -320,6 +320,8 @@ export function stateMixin (Vue: Class<Component>) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
+
+  // 设置 data 和 props 的代理
   const dataDef = {}
   dataDef.get = function () { return this._data }
   const propsDef = {}
@@ -339,9 +341,11 @@ export function stateMixin (Vue: Class<Component>) {
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
+  //挂载 $set 和 $delete
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
 
+  // 挂载 $watch
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,

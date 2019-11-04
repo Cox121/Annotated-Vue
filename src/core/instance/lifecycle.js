@@ -138,6 +138,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+// 初始化函数
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -194,6 +195,7 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // 渲染Watcher
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {

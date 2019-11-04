@@ -13,9 +13,11 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 let uid = 0
 
 export function initMixin (Vue: Class<Component>) {
+  // 声明原型上的_init方法
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
+    // 实例计数
     vm._uid = uid++
 
     let startTag, endTag

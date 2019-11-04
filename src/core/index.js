@@ -3,7 +3,7 @@ import { initGlobalAPI } from './global-api/index'
 import { isServerRendering } from 'core/util/env'
 import { FunctionalRenderContext } from 'core/vdom/create-functional-component'
 
-initGlobalAPI(Vue)
+initGlobalAPI(Vue) // config util set delete nextTick observable options等一些全局api的初始化
 
 Object.defineProperty(Vue.prototype, '$isServer', {
   get: isServerRendering

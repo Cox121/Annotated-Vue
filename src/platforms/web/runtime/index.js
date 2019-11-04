@@ -1,5 +1,4 @@
 /* @flow */
-
 import Vue from 'core/index'
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
@@ -38,7 +37,8 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
-  el = el && inBrowser ? query(el) : undefined
+  // vue初始化
+  el = el && inBrowser ? query(el) : undefined //
   return mountComponent(this, el, hydrating)
 }
 
