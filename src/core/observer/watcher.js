@@ -92,7 +92,7 @@ export default class Watcher {
     }
     this.value = this.lazy
       ? undefined
-      : this.get()
+      : this.get() //首次渲染会在这里面触发
   }
 
   /**
