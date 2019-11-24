@@ -4,7 +4,9 @@ import { extend } from 'shared/util'
 import { detectErrors } from './error-detector'
 import { createCompileToFunctionFn } from './to-function'
 
+// createCompiler的生成器
 export function createCompilerCreator (baseCompile: Function): Function {
+  // compiler 生成器
   return function createCompiler (baseOptions: CompilerOptions) {
     function compile (
       template: string,
