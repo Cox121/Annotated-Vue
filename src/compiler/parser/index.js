@@ -221,7 +221,7 @@ export function parse (
         attrs = guardIESVGBug(attrs)
       }
 
-      let element: ASTElement = createASTElement(tag, attrs, currentParent)
+      let element: ASTElement = createASTElement(tag, attrs, currentParent) // 创建type为1的ast
       if (ns) {
         element.ns = ns
       }
@@ -249,6 +249,7 @@ export function parse (
         })
       }
 
+      // 禁止渲染style标签、为赋于type属性的script标签、type属性为text/javascript的script标签
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
@@ -260,6 +261,7 @@ export function parse (
       }
 
       // apply pre-transforms
+      // web环境下：处理 v-model
       for (let i = 0; i < preTransforms.length; i++) {
         element = preTransforms[i](element, options) || element
       }

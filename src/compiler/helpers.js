@@ -11,6 +11,7 @@ export function baseWarn (msg: string, range?: Range) {
 }
 /* eslint-enable no-unused-vars */
 
+// 将一个数组转换成数组成员中的key属性对应的值组成的新数组
 export function pluckModuleFunction<F: Function> (
   modules: ?Array<Object>,
   key: string
