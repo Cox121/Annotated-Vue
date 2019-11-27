@@ -173,7 +173,7 @@ export function getBindingAttr (
     const staticValue = getAndRemoveAttr(el, name)
     if (staticValue != null) {
       return JSON.stringify(staticValue)
-    }
+    }s
   }
 }
 
@@ -181,6 +181,7 @@ export function getBindingAttr (
 // doesn't get processed by processAttrs.
 // By default it does NOT remove it from the map (attrsMap) because the map is
 // needed during codegen.
+// 默认只删除attrsList中的对应的属性， removeFromMap === true时会删除attrsMap中的属性
 export function getAndRemoveAttr (
   el: ASTElement,
   name: string,

@@ -2,6 +2,8 @@
 
 const validDivisionCharRE = /[\w).+\-_$\]]/
 
+
+// 解析表达式中的管道符调用的filter，最后将表达式转换成 _f('fliterName')(exp)的形式， 多个管道符择多次调用
 export function parseFilters (exp: string): string {
   let inSingle = false
   let inDouble = false
@@ -17,7 +19,7 @@ export function parseFilters (exp: string): string {
     prev = c
     c = exp.charCodeAt(i)
     if (inSingle) {
-      if (c === 0x27 && prev !== 0x5C) inSingle = false
+      if (c === 0x27 && prev !== 0x5C) inSingle = false // 0x5C \
     } else if (inDouble) {
       if (c === 0x22 && prev !== 0x5C) inDouble = false
     } else if (inTemplateString) {
@@ -25,7 +27,7 @@ export function parseFilters (exp: string): string {
     } else if (inRegex) {
       if (c === 0x2f && prev !== 0x5C) inRegex = false
     } else if (
-      c === 0x7C && // pipe
+      c === 0x7C && // pipe |符号
       exp.charCodeAt(i + 1) !== 0x7C &&
       exp.charCodeAt(i - 1) !== 0x7C &&
       !curly && !square && !paren

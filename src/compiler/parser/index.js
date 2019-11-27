@@ -25,9 +25,9 @@ export const onRE = /^@|^v-on:/
 export const dirRE = process.env.VBIND_PROP_SHORTHAND
   ? /^v-|^@|^:|^\.|^#/
   : /^v-|^@|^:|^#/
-export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
-export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/
-const stripParensRE = /^\(|\)$/g
+export const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/ // 量词后加？为非贪婪模式，会尽量少匹配，主要是为了防止用户在第一个参数后跟了多个空格被解析成第一个参数的字符 示例："item in items" => ['item in items', 'item', 'items']
+export const forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/ // 匹配for表达式的第二第三想 示例：'value, key, index' => [', key, index', 'key', 'index']
+const stripParensRE = /^\(|\)$/g // 匹配首尾括号
 const dynamicArgRE = /^\[.*\]$/
 
 const argRE = /:(.*)$/
@@ -66,7 +66,7 @@ export function createASTElement (
     type: 1,
     tag,
     attrsList: attrs,
-    attrsMap: makeAttrsMap(attrs),
+    attrsMap: makeAttrsMap(attrs), //将attrs转换成name:value形式
     rawAttrsMap: {},
     parent,
     children: []
@@ -170,6 +170,7 @@ export function parse (
     }
   }
 
+  // 去除末尾的空格
   function trimEndingWhitespace (el) {
     // remove trailing whitespace node
     if (!inPre) {
@@ -184,6 +185,9 @@ export function parse (
     }
   }
 
+  // 检测根元素规范性：
+  // 1. 不允许使用slot和template作为根元素
+  // 2. 不允许在根元素上使用v-for
   function checkRootConstraints (el) {
     if (el.tag === 'slot' || el.tag === 'template') {
       warnOnce(
@@ -265,13 +269,15 @@ export function parse (
       for (let i = 0; i < preTransforms.length; i++) {
         element = preTransforms[i](element, options) || element
       }
-
+      
+      // 处理 v-pre 指令， 只要 v-pre 不为 null 则视为需要进行pre处理
       if (!inVPre) {
         processPre(element)
         if (element.pre) {
           inVPre = true
         }
       }
+      // 处理 pre 标签
       if (platformIsPreTag(element.tag)) {
         inPre = true
       }
@@ -284,13 +290,15 @@ export function parse (
         processOnce(element)
       }
 
+      // 当前不存在根元素的话说明现在这个元素将要成为根元素
       if (!root) {
         root = element
         if (process.env.NODE_ENV !== 'production') {
-          checkRootConstraints(root)
+          checkRootConstraints(root) // 根元素规范性检测
         }
       }
 
+      // 自闭合标签处理
       if (!unary) {
         currentParent = element
         stack.push(element)
@@ -302,6 +310,7 @@ export function parse (
     end (tag, start, end) {
       const element = stack[stack.length - 1]
       // pop stack
+      // 即将结束当前元素的编译，将当前元素做出栈处理，并将currentParent 恢复成上一个元素
       stack.length -= 1
       currentParent = stack[stack.length - 1]
       if (process.env.NODE_ENV !== 'production' && options.outputSourceRange) {
@@ -407,6 +416,7 @@ function processPre (el) {
   }
 }
 
+// 处理行内属性
 function processRawAttrs (el) {
   const list = el.attrsList
   const len = list.length
@@ -446,6 +456,7 @@ export function processElement (
   processSlotContent(element)
   processSlotOutlet(element)
   processComponent(element)
+  // 中置处理
   for (let i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element
   }
@@ -453,9 +464,13 @@ export function processElement (
   return element
 }
 
+// 处理 :key
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
+    // 检测key绑定值的合理性：
+    // 1. template标签不能设置key
+    // 2. transition-group的子元素中不能将v-for的index设置为key
     if (process.env.NODE_ENV !== 'production') {
       if (el.tag === 'template') {
         warn(
@@ -480,6 +495,7 @@ function processKey (el) {
   }
 }
 
+// 处理 ref
 function processRef (el) {
   const ref = getBindingAttr(el, 'ref')
   if (ref) {
@@ -488,6 +504,8 @@ function processRef (el) {
   }
 }
 
+// 处理 v-for 指令
+// 将(value, key, index) in obj 中的 obj, value, key, index 分别赋予到el.for, el.alias, el.iterator1, el.iterator2
 export function processFor (el: ASTElement) {
   let exp
   if ((exp = getAndRemoveAttr(el, 'v-for'))) {
@@ -514,13 +532,13 @@ export function parseFor (exp: string): ?ForParseResult {
   const inMatch = exp.match(forAliasRE)
   if (!inMatch) return
   const res = {}
-  res.for = inMatch[2].trim()
-  const alias = inMatch[1].trim().replace(stripParensRE, '')
-  const iteratorMatch = alias.match(forIteratorRE)
+  res.for = inMatch[2].trim() // (item, index) in item 中的 item
+  const alias = inMatch[1].trim().replace(stripParensRE, '') // 去掉首尾括号,拿到(item, index) in item中的item, index
+  const iteratorMatch = alias.match(forIteratorRE) // 尝试匹配item, index中， item之后还有没有其他的
   if (iteratorMatch) {
-    res.alias = alias.replace(forIteratorRE, '').trim()
-    res.iterator1 = iteratorMatch[1].trim()
-    if (iteratorMatch[2]) {
+    res.alias = alias.replace(forIteratorRE, '').trim() //拿到item, index中的item
+    res.iterator1 = iteratorMatch[1].trim() //拿到item, index中的index
+    if (iteratorMatch[2]) { // 如 value, key, index 这样的对对象使用v-for会存在第三项，即value
       res.iterator2 = iteratorMatch[2].trim()
     }
   } else {
@@ -529,6 +547,8 @@ export function parseFor (exp: string): ?ForParseResult {
   return res
 }
 
+// 处理 v-if/v-else-if/v-else 指令
+// 如果存在 v-if 指令，生成el.ifConditions，并将当前元素加入
 function processIf (el) {
   const exp = getAndRemoveAttr(el, 'v-if')
   if (exp) {
@@ -589,6 +609,8 @@ export function addIfCondition (el: ASTElement, condition: ASTIfCondition) {
   el.ifConditions.push(condition)
 }
 
+// 处理 v-once
+// 如果存在v-once指令， 将el-once设为true
 function processOnce (el) {
   const once = getAndRemoveAttr(el, 'v-once')
   if (once != null) {
@@ -598,6 +620,7 @@ function processOnce (el) {
 
 // handle content being passed to a component as slot,
 // e.g. <template slot="xxx">, <div slot-scope="xxx">
+// 处理 slot-scope，将el.slotScope 设为slot-scope的值
 function processSlotContent (el) {
   let slotScope
   if (el.tag === 'template') {
@@ -733,6 +756,8 @@ function getSlotName (binding) {
 }
 
 // handle <slot/> outlets
+// 处理slot标签， slot标签上不能使用key
+// el.slotName设为slot标签的name属性
 function processSlotOutlet (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
@@ -747,6 +772,9 @@ function processSlotOutlet (el) {
   }
 }
 
+// 处理 is 和 inline-template
+// el.component 设为 is属性的值
+// 如果设置了inline-template属性，el.inlineTemplate设为true
 function processComponent (el) {
   let binding
   if ((binding = getBindingAttr(el, 'is'))) {
