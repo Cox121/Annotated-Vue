@@ -96,6 +96,7 @@ export function genElement (el: ASTElement, state: CodegenState): string {
 }
 
 // hoist static sub-trees out
+// _m(renderFn, el.staticInFor)
 function genStatic (el: ASTElement, state: CodegenState): string {
   el.staticProcessed = true
   // Some elements (templates) need to behave differently inside of a v-pre
@@ -115,6 +116,8 @@ function genStatic (el: ASTElement, state: CodegenState): string {
 }
 
 // v-once
+// 1. el.staticInFor === true : _o(renderFn, onceId, key)
+// 2. el.staticInFor === false : genStatic()
 function genOnce (el: ASTElement, state: CodegenState): string {
   el.onceProcessed = true
   if (el.if && !el.ifProcessed) {
@@ -152,6 +155,7 @@ export function genIf (
   return genIfConditions(el.ifConditions.slice(), state, altGen, altEmpty)
 }
 
+// (ifExp) ? ifRenderFn : (elseIfExp) ? elseIfRenderFn : (elseExp) ? elseRenderFn
 function genIfConditions (
   conditions: ASTIfConditions,
   state: CodegenState,
