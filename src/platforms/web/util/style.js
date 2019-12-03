@@ -2,6 +2,7 @@
 
 import { cached, extend, toObject } from 'shared/util'
 
+// 将style转换成 属性名属性值的Map
 export const parseStyleText = cached(function (cssText) {
   const res = {}
   const listDelimiter = /;(?![^(]*\))/g

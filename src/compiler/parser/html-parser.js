@@ -124,7 +124,7 @@ export function parseHTML (html, options) {
       }
 
       let text, rest, next
-      if (textEnd >= 0) {
+      if (textEnd >= 0) { // < 位置不处于头部， 说明上一个元素跟下一个元素中间存在字符串
         rest = html.slice(textEnd)
         while (
           !endTag.test(rest) &&
@@ -133,6 +133,7 @@ export function parseHTML (html, options) {
           !conditionalComment.test(rest)
         ) {
           // < in plain text, be forgiving and treat it as text
+          // 当一个 < 符号不是上述情况的时候，将其视作字符串跳过
           next = rest.indexOf('<', 1)
           if (next < 0) break
           textEnd += next
@@ -153,6 +154,7 @@ export function parseHTML (html, options) {
         options.chars(text, index - text.length, index)
       }
     } else {
+      
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
       const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))

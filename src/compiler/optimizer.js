@@ -35,6 +35,7 @@ function genStaticKeys (keys: string): Function {
   )
 }
 
+// 标记静态节点 
 function markStatic (node: ASTNode) {
   node.static = isStatic(node)
   if (node.type === 1) {

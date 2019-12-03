@@ -67,12 +67,13 @@ function prependModifierMarker (symbol: string, name: string, dynamic?: boolean)
     : symbol + name // mark the event as captured
 }
 
+// 处理事件，并生成el.events/el.nativeEvents
 export function addHandler (
   el: ASTElement,
   name: string,
   value: string,
   modifiers: ?ASTModifiers,
-  important?: boolean,
+  important?: boolean, // 决定事件插入位置在最后还是最前
   warn?: ?Function,
   range?: Range,
   dynamic?: boolean
@@ -94,6 +95,7 @@ export function addHandler (
   // normalize click.right and click.middle since they don't actually fire
   // this is technically browser-specific, but at least for now browsers are
   // the only target envs that have right/middle clicks.
+  // 鼠标右键和中键的修饰符处理
   if (modifiers.right) {
     if (dynamic) {
       name = `(${name})==='click'?'contextmenu':(${name})`
@@ -110,10 +112,12 @@ export function addHandler (
   }
 
   // check capture modifier
+  // 修改事件为捕获模式的修饰符
   if (modifiers.capture) {
     delete modifiers.capture
     name = prependModifierMarker('!', name, dynamic)
   }
+  // 触发一次的修饰符
   if (modifiers.once) {
     delete modifiers.once
     name = prependModifierMarker('~', name, dynamic)

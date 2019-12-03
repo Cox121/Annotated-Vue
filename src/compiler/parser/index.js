@@ -33,7 +33,7 @@ const dynamicArgRE = /^\[.*\]$/
 const argRE = /:(.*)$/
 export const bindRE = /^:|^\.|^v-bind:/
 const propBindRE = /^\./
-const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g
+const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g // ?= 前瞻
 
 const slotRE = /^v-slot(:|$)|^#/
 
@@ -116,7 +116,7 @@ export function parse (
       element = processElement(element, options)
     }
     // tree management
-    if (!stack.length && element !== root) {
+    if (!stack.length && element !== root) { // !stack.length 表示所有元素已经解析完了， 但是现在却任然在执行解析， 说明有元素处于根元素之外，且element !== root 说明不是根元素
       // allow root elements with v-if, v-else-if and v-else
       if (root.if && (element.elseif || element.else)) {
         if (process.env.NODE_ENV !== 'production') {
@@ -137,6 +137,7 @@ export function parse (
     }
     if (currentParent && !element.forbidden) {
       if (element.elseif || element.else) {
+        // 处理v-else-if 和 v-else
         processIfConditions(element, currentParent)
       } else {
         if (element.slotScope) {
@@ -146,6 +147,7 @@ export function parse (
           const name = element.slotTarget || '"default"'
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         }
+        // 构建父子关系
         currentParent.children.push(element)
         element.parent = currentParent
       }
@@ -158,6 +160,7 @@ export function parse (
     trimEndingWhitespace(element)
 
     // check pre state
+    // 恢复状态
     if (element.pre) {
       inVPre = false
     }
@@ -165,6 +168,8 @@ export function parse (
       inPre = false
     }
     // apply post-transforms
+    // 后置处理
+    // 暂时没有处理，保留接口
     for (let i = 0; i < postTransforms.length; i++) {
       postTransforms[i](element, options)
     }
@@ -265,7 +270,7 @@ export function parse (
       }
 
       // apply pre-transforms
-      // web环境下：处理 v-model
+      // web环境下：处理 设置了v-model的input标签
       for (let i = 0; i < preTransforms.length; i++) {
         element = preTransforms[i](element, options) || element
       }
@@ -320,6 +325,7 @@ export function parse (
     },
 
     chars (text: string, start: number, end: number) {
+      // 处理字符串
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
           if (text === template) {
@@ -457,6 +463,8 @@ export function processElement (
   processSlotOutlet(element)
   processComponent(element)
   // 中置处理
+  // 1. 将class属性分为绑定的class——el.classBinding 和静态class——el.staticClass
+  // 2. 将style属性分为绑定的style——el.styleBinding 和静态style——el.staticStyle
   for (let i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element
   }
@@ -795,6 +803,7 @@ function processAttrs (el) {
       // mark element as dynamic
       el.hasBindings = true
       // modifiers
+      // 提取修饰符
       modifiers = parseModifiers(name.replace(dirRE, ''))
       // support .foo shorthand syntax for the .prop modifier
       if (process.env.VBIND_PROP_SHORTHAND && propBindRE.test(name)) {
@@ -804,7 +813,7 @@ function processAttrs (el) {
         name = name.replace(modifierRE, '')
       }
       if (bindRE.test(name)) { // v-bind
-        name = name.replace(bindRE, '')
+        name = name.replace(bindRE, '') // 提取v-bind的属性名
         value = parseFilters(value)
         isDynamic = dynamicArgRE.test(name)
         if (isDynamic) {
@@ -818,6 +827,10 @@ function processAttrs (el) {
             `The value for a v-bind expression cannot be empty. Found in "v-bind:${name}"`
           )
         }
+        // 处理修饰符
+        // 1. .prop
+        // 2. .camel 调用了转驼峰函数
+        // 3. .sync 
         if (modifiers) {
           if (modifiers.prop && !isDynamic) {
             name = camelize(name)
@@ -829,6 +842,7 @@ function processAttrs (el) {
           if (modifiers.sync) {
             syncGen = genAssignmentCode(value, `$event`)
             if (!isDynamic) {
+              // 添加update:name的事件
               addHandler(
                 el,
                 `update:${camelize(name)}`,
@@ -864,6 +878,7 @@ function processAttrs (el) {
             }
           }
         }
+        // 判断绑定的属性应该添加进prop还是attr
         if ((modifiers && modifiers.prop) || (
           !el.component && platformMustUseProp(el.tag, el.attrsMap.type, name)
         )) {
@@ -881,7 +896,7 @@ function processAttrs (el) {
       } else { // normal directives
         name = name.replace(dirRE, '')
         // parse arg
-        const argMatch = name.match(argRE)
+        const argMatch = name.match(argRE) // 指令参数解析
         let arg = argMatch && argMatch[1]
         isDynamic = false
         if (arg) {
@@ -892,12 +907,14 @@ function processAttrs (el) {
           }
         }
         addDirective(el, name, rawName, value, arg, isDynamic, modifiers, list[i])
+        // 处理 v-for 和 v-model 的冲突，防止循环引用
         if (process.env.NODE_ENV !== 'production' && name === 'model') {
           checkForAliasModel(el, value)
         }
       }
     } else {
       // literal attribute
+      // id="{{ val }}" 这种形式不再被支持
       if (process.env.NODE_ENV !== 'production') {
         const res = parseText(value, delimiters)
         if (res) {
@@ -910,7 +927,7 @@ function processAttrs (el) {
           )
         }
       }
-      addAttr(el, name, JSON.stringify(value), list[i])
+      addAttr(el, name, JSON.stringify(value), list[i]) // 值类型的属性加上了JSON.stringify
       // #6887 firefox doesn't update muted state if set via attribute
       // even immediately after element creation
       if (!el.component &&

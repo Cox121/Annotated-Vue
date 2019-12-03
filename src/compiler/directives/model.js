@@ -67,11 +67,15 @@ type ModelParseResult = {
   key: string | null
 }
 
+// 解析属性值表达式，将表达式分为最后一位key 和 exp。示例： 'obj.key1.key2' => {exp：'obj.key1', key:'key2' }
+// 1. 判断属性值表达式最后一个key是否是由[]包裹，如果不是则说明是.调用的，直接从最后一个.的位置截开，前面部分作为exp，后面部分作为key
+// 2. 逐位查找，找到不是字符串中的[位置后去找它对应闭合]的位置，然后这两个位置间的内容作为key，其余部分作为exp
 export function parseModel (val: string): ModelParseResult {
   // Fix https://github.com/vuejs/vue/pull/7730
   // allow v-model="obj.val " (trailing whitespace)
   val = val.trim()
   len = val.length
+
 
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
     index = val.lastIndexOf('.')
@@ -96,7 +100,7 @@ export function parseModel (val: string): ModelParseResult {
     /* istanbul ignore if */
     if (isStringStart(chr)) {
       parseString(chr)
-    } else if (chr === 0x5B) {
+    } else if (chr === 0x5B) {  // 0x5B [
       parseBracket(chr)
     }
   }
@@ -116,7 +120,7 @@ function eof (): boolean {
 }
 
 function isStringStart (chr: number): boolean {
-  return chr === 0x22 || chr === 0x27
+  return chr === 0x22 || chr === 0x27  // 0x22 " 0x27 '
 }
 
 function parseBracket (chr: number): void {
