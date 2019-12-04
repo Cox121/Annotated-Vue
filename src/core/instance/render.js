@@ -60,6 +60,7 @@ export function setCurrentRenderingInstance (vm: Component) {
 
 export function renderMixin (Vue: Class<Component>) {
   // install runtime convenience helpers
+  // 挂载渲染方法（普通元素，使用了v-for的元素，使用了v-if的元素等都会使用不同的渲染方法）
   installRenderHelpers(Vue.prototype)
 
   Vue.prototype.$nextTick = function (fn: Function) {

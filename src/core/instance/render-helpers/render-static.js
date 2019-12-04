@@ -3,11 +3,12 @@
 /**
  * Runtime helper for rendering static trees.
  */
+// 将渲染过的静态节点保存在vm._staticTrees中，每次渲染前会去查找vm._staticTrees中是否存在，存在则直接取用
 export function renderStatic (
   index: number,
   isInFor: boolean
 ): VNode | Array<VNode> {
-  const cached = this._staticTrees || (this._staticTrees = [])
+  const cached = this.c || (this._staticTrees = [])
   let tree = cached[index]
   // if has already-rendered static tree and not inside v-for,
   // we can reuse the same tree.
