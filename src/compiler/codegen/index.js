@@ -554,9 +554,15 @@ export function genComment (comment: ASTText): string {
   return `_e(${JSON.stringify(comment.text)})`
 }
 
+// renderSlot (
+//  name: string,
+//  fallback: ?Array<VNode>,  //后备内容
+//  props: ?Object,
+//  bindObject: ?Object
+// )
 function genSlot (el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
-  const children = genChildren(el, state)
+  const children = genChildren(el, state) // slot节点的子节点表示后备内容
   let res = `_t(${slotName}${children ? `,${children}` : ''}`
   const attrs = el.attrs || el.dynamicAttrs
     ? genProps((el.attrs || []).concat(el.dynamicAttrs || []).map(attr => ({
