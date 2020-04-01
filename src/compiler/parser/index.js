@@ -116,7 +116,9 @@ export function parse (
       element = processElement(element, options)
     }
     // tree management
-    if (!stack.length && element !== root) { // !stack.length 表示所有元素已经解析完了， 但是现在却任然在执行解析， 说明有元素处于根元素之外，且element !== root 说明不是根元素
+    // !stack.length 表示所有元素已经解析完了， 但是现在却任然在执行解析， 说明有元素处于根元素之外，且element !== root 说明不是根元素
+    // 此处时为了处理 根节点使用v-if/else-if/else的情况
+    if (!stack.length && element !== root) { 
       // allow root elements with v-if, v-else-if and v-else
       if (root.if && (element.elseif || element.else)) {
         if (process.env.NODE_ENV !== 'production') {
@@ -660,6 +662,7 @@ function processSlotContent (el) {
   }
 
   // slot="xxx"
+  // 处理标签中的 slot  属性
   const slotTarget = getBindingAttr(el, 'slot')
   if (slotTarget) {
     el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
