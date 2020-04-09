@@ -57,9 +57,9 @@ export function genElement (el: ASTElement, state: CodegenState): string {
     el.pre = el.pre || el.parent.pre
   }
 
-  if (el.staticRoot && !el.staticProcessed) {
+  if (el.staticRoot && !el.staticProcessed) { // 通过staticProcessed来判断静态节点是否已经编译完成，放置重复编译
     return genStatic(el, state)
-  } else if (el.once && !el.onceProcessed) {
+  } else if (el.once && !el.onceProcessed) { 
     return genOnce(el, state)
   } else if (el.for && !el.forProcessed) {
     return genFor(el, state)
@@ -96,8 +96,9 @@ export function genElement (el: ASTElement, state: CodegenState): string {
 }
 
 // hoist static sub-trees out
+// 处理静态节根点
 // _m (
-//   index: number,
+//   index: number,  渲染函数在state.staticRenderFns中的位置
 //   isInFor: boolean
 // )
 function genStatic (el: ASTElement, state: CodegenState): string {
@@ -124,7 +125,7 @@ function genStatic (el: ASTElement, state: CodegenState): string {
 // 
 function genOnce (el: ASTElement, state: CodegenState): string {
   el.onceProcessed = true
-  if (el.if && !el.ifProcessed) {
+  if (el.if && !el.ifProcessed) {  // 未确定将渲染哪个 block 的情况下， 先进行if的编译
     return genIf(el, state)
   } else if (el.staticInFor) {
     let key = ''
@@ -554,10 +555,19 @@ export function genComment (comment: ASTText): string {
   return `_e(${JSON.stringify(comment.text)})`
 }
 
+<<<<<<< HEAD
 // 
+=======
+// renderSlot (
+//  name: string,
+//  fallback: ?Array<VNode>,  //后备内容
+//  props: ?Object,
+//  bindObject: ?Object
+// )
+>>>>>>> 372822232a7abca402b283de8d37da9fdcc16e86
 function genSlot (el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
-  const children = genChildren(el, state)
+  const children = genChildren(el, state) // slot节点的子节点表示后备内容
   let res = `_t(${slotName}${children ? `,${children}` : ''}`
   const attrs = el.attrs || el.dynamicAttrs
     ? genProps((el.attrs || []).concat(el.dynamicAttrs || []).map(attr => ({

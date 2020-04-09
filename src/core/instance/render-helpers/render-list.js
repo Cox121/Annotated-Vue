@@ -14,17 +14,17 @@ export function renderList (
   ) => VNode
 ): ?Array<VNode> {
   let ret: ?Array<VNode>, i, l, keys, key
-  if (Array.isArray(val) || typeof val === 'string') {
+  if (Array.isArray(val) || typeof val === 'string') { // 数组或者字符串的渲染
     ret = new Array(val.length)
     for (i = 0, l = val.length; i < l; i++) {
       ret[i] = render(val[i], i)
     }
-  } else if (typeof val === 'number') {
+  } else if (typeof val === 'number') { // 数字的渲染
     ret = new Array(val)
     for (i = 0; i < val; i++) {
       ret[i] = render(i + 1, i)
     }
-  } else if (isObject(val)) {
+  } else if (isObject(val)) { // 对象的渲染
     if (hasSymbol && val[Symbol.iterator]) {
       ret = []
       const iterator: Iterator<any> = val[Symbol.iterator]()
