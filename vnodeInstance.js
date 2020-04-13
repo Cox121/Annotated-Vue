@@ -30,12 +30,18 @@ const vnode = {
   }],
   start:0, // 节点的开始位置
   end: 20, // 节点的结束位置
-  attrs: [{
+  props:[{
     name:'', // 属性名
     value:'' // 通过JSON.stringify的属性值
     start: 0, // 属性值的开始位置
     end: 5 // 属性值的结束位置
   }],
+  attrs: [{
+    name:'', // 属性名
+    value:'' // 通过JSON.stringify的属性值
+    start: 0, // 属性值的开始位置
+    end: 5 // 属性值的结束位置
+  }], 
   attrsList: [{
     name: '', // 属性名称
     value: '' // 属性值
@@ -46,5 +52,7 @@ const vnode = {
   rawAttrsMap: {}, // 所有节点行内属性，以name:{name:'', value''}的形式保存，attrsList中被删除掉的部分也能在这里找到 
   parent: vnode, // 父节点，也是一个vnode实例
   children: [] // 子节点， 一个vnode实例的数组
-  hasBindings: true // 标识节点是否带绑定属性
+  hasBindings: true， // 标识节点是否带绑定属性
+  static: true, // 标识是否是静态节点
+  staticRoot: true, // 标识是否是静态根节点
 }
