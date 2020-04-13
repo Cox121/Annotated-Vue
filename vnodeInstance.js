@@ -1,5 +1,5 @@
 const vnode = {
-  type:'', // vnode类型
+  type:'', // vnode类型 1-普通节点 2-带表达式的文本节点 3-纯文本节点
   tag:'', // 标签名
   forbidden: true, // 是否禁止渲染
   pre: true, // 标识是否使用了v-pre指令, 使用了v-pre的节点会跳过编译
@@ -51,8 +51,8 @@ const vnode = {
   attrsMap: {}, // 将节点属性以name:value形式保存的对象
   rawAttrsMap: {}, // 所有节点行内属性，以name:{name:'', value''}的形式保存，attrsList中被删除掉的部分也能在这里找到 
   parent: vnode, // 父节点，也是一个vnode实例
-  children: [] // 子节点， 一个vnode实例的数组
-  hasBindings: true， // 标识节点是否带绑定属性
-  static: true, // 标识是否是静态节点
-  staticRoot: true, // 标识是否是静态根节点
+  children: [], // 子节点， 一个vnode实例的数组
+  hasBindings: true, // 标识节点是否带绑定属性
+  static: true, // 标识节点是否是静态节点，静态节点会要求本节点和其子节点、其if/elseif/else产生的兄弟节点都为静态节点
+  staticRoot: true, // 标识节点是否是静态根节点， 静态根节点会要求其本身为静态节点，且含有子节点，且其子节点不仅仅为一个文本节点
 }
