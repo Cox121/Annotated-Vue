@@ -555,16 +555,20 @@ export function genComment (comment: ASTText): string {
   return `_e(${JSON.stringify(comment.text)})`
 }
 
-<<<<<<< HEAD
-// 
-=======
 // renderSlot (
 //  name: string,
 //  fallback: ?Array<VNode>,  //后备内容
 //  props: ?Object,
 //  bindObject: ?Object
 // )
->>>>>>> 372822232a7abca402b283de8d37da9fdcc16e86
+
+// _t(slotName, children)  存在子节点，且slot节点上用了属性
+// _t(slotName, null, attrs, bind)  不存在子节点，且slot节点上用了attrs或者v-bind属性
+// _t(slotName, null, attrs, null)  
+// _t(slotName, null, null, bind)  
+// _t(slotName, children, attrs)  存在子节点，slot节点上用了attrs但没用使用v-bind
+// _t(slotName, children, null, bild) 存在子节点，slot节点上用了v-bind但没用使用attrs
+// _t(slotName, children, attrs, bind) 存在子节点，slot节点上用了v-bind和attrs
 function genSlot (el: ASTElement, state: CodegenState): string {
   const slotName = el.slotName || '"default"'
   const children = genChildren(el, state) // slot节点的子节点表示后备内容

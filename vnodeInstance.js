@@ -13,7 +13,7 @@ const vnode = {
   slotTargetDynamic: '', // 动态slot属性的值，如：:slot
   scopedSlots: {},
   slotContainer: vnode, 
-  component:'', // is属性的值
+  component:'', // is属性的值 即组件名
   inlineTemplate: true, // 标识是否使用了inline-template属性
   slotName: '', // slot标签的name属性，只有当tag为slot时才存在
   once: true, // 标识是否使用了v-once指令
