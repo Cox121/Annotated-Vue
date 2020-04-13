@@ -56,7 +56,7 @@ export function initState (vm: Component) {
     observe(vm._data = {}, true /* asRootData */)
   }
   if (opts.computed) initComputed(vm, opts.computed)
-  if (opts.watch && opts.watch !== nativeWatch) {
+  if (opts.watch && opts.watch !== nativeWatch) { // 火狐对象自带一个watch opts.watch !== nativeWatch 是为了防止冲突
     initWatch(vm, opts.watch)
   }
 }
@@ -260,6 +260,7 @@ function createGetterInvoker(fn) {
 }
 
 function initMethods (vm: Component, methods: Object) {
+  // 主要是处理一些防命名冲突然后使用bind 将函数this指向vm实例
   const props = vm.$options.props
   for (const key in methods) {
     if (process.env.NODE_ENV !== 'production') {

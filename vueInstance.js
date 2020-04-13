@@ -28,7 +28,7 @@ const Vue = {
   $parent: vm, // 离当前节点最近的非抽象父节点
   $root: vm, // 根节点
   $refs: {},
-  _watcher: null
+  _watcher: null,
   _inactive: null,
   _directInactive: false,
   _isMounted: false,
@@ -40,11 +40,16 @@ const Vue = {
   // initRender中初始化
   _vnode: null,
   _staticTrees: null,
-  $vnode: null,
+  $vnode: null, // 
   $slots: 
   $scopedSlots: 
   _c: 
   $createElement: 
   $attrs: 
   $listeners: 
+  // initState中初始化
+  _watchers:[],
+  _props: {},
+  _data(){}, // 为了防止不同实例间data的互相污染，data必须为一个函数，以确保为每一个实例都返回一份独立的data
+  _computedWatchers:{} // 保存了computed的watchers
 }
