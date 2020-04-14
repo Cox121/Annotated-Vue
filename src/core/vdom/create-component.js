@@ -233,8 +233,8 @@ function installComponentHooks (data: VNodeData) {
       hooks[key] = existing ? mergeHook(toMerge, existing) : toMerge
     }
   }
+  
 }
-
 function mergeHook (f1: any, f2: any): Function {
   const merged = (a, b) => {
     // flow complains about extra args which is why we use any

@@ -215,7 +215,7 @@ export function createPatchFunction (backend) {
       vnode.elm = nodeOps.createTextNode(vnode.text)
       insert(parentElm, vnode.elm, refElm)
     }
-  }
+  } 
 
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
@@ -724,7 +724,7 @@ export function createPatchFunction (backend) {
   }
 
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
-    if (isUndef(vnode)) {
+    if (isUndef(vnode)) { // 不存在新节点，执行旧节点的销毁逻辑
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
       return
     }

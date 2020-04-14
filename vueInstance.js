@@ -51,5 +51,6 @@ const Vue = {
   _watchers:[],
   _props: {},
   _data(){}, // 为了防止不同实例间data的互相污染，data必须为一个函数，以确保为每一个实例都返回一份独立的data
-  _computedWatchers:{} // 保存了computed的watchers
+  _computedWatchers:{}, // 保存了computed的watchers
+  _update(){},
 }
