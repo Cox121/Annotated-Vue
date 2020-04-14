@@ -322,7 +322,7 @@ export function stateMixin (Vue: Class<Component>) {
   // when using Object.defineProperty, so we have to procedurally build up
   // the object here.
 
-  // 设置 data 和 props 的代理
+  // 设置 data 和 props 的代理, 将 _data 和 _props 代理到 $data 和 $props
   const dataDef = {}
   dataDef.get = function () { return this._data }
   const propsDef = {}

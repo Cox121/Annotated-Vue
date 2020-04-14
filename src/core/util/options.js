@@ -118,6 +118,7 @@ export function mergeDataOrFn (
   }
 }
 
+// strat(parent[key], child[key], vm, key)
 strats.data = function (
   parentVal: any,
   childVal: any,
@@ -295,6 +296,11 @@ export function validateComponentName (name: string) {
  * Ensure all props option syntax are normalized into the
  * Object-based format.
  */
+// 1 ['prop']
+// 2 {prop: String}
+// 将上述两种写法的props规范为
+// {prop:{type:xxx}}
+// 第一种写法的type为null
 function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props
   if (!props) return
