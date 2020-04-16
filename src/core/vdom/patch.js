@@ -767,7 +767,9 @@ export function createPatchFunction (backend) {
           }
           // either not server-rendered, or hydration failed.
           // create an empty node and replace it
+          // new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
           oldVnode = emptyNodeAt(oldVnode) //如果是真实DOM（初始化的时候传入的vm.$el），则以此DOM创建一个不包含子节点的Vnode
+          
         }
 
         // replacing existing element

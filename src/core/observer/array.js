@@ -21,6 +21,7 @@ const methodsToPatch = [
 /**
  * Intercept mutating methods and emit events
  */
+// 改写原来原型上的部分方法
 methodsToPatch.forEach(function (method) {
   // cache original method
   const original = arrayProto[method]

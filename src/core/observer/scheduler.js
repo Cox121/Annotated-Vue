@@ -165,7 +165,7 @@ export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
   if (has[id] == null) {
     has[id] = true
-    if (!flushing) {
+    if (!flushing) { // flushing 当前是否正在进行更新的标识
       queue.push(watcher)
     } else {
       // if already flushing, splice the watcher based on its id

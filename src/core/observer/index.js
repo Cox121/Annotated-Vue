@@ -43,6 +43,7 @@ export class Observer {
     this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+    // 在__ob__上保留对当前Observer的引用
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
       if (hasProto) {
@@ -149,6 +150,13 @@ export function defineReactive (
   // cater for pre-defined getter/setters
   const getter = property && property.get
   const setter = property && property.set
+  // 只要设置了setter 都进行取值操作
+  // 没设置setter的话， 只对没设置自定义getter的进行取值操作
+  // 没设置自定义setter的时候只对没设置自定义getter的进行取值是为了避免用户在自定义的getter中出现的
+  // 不可预料的错误影响代码运行，比如返回值有问题、存在Bug等，进而放弃了深度观测（161行的observe(val)）
+  // 对设置了自定义setter的都进行取值操作是因为在触发vue定义的setter的时候必然会对新值进行深度观
+  // 测，如果按照之前的逻辑，自定义了getter的数值是不应该进行深度观测的，此时就出现了行为上的不一致
+  // 为了防止这种不一致性，所以只要定义了setter的任然会对数值进行深度观测
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
