@@ -117,6 +117,9 @@ export default class Watcher {
         traverse(value)
       }
       popTarget()
+      // addDep过程中，只能保证这一次收集的依赖和上一次收集的依赖不会重复
+      // 但可能存在 更早以前收集的依赖 和 这次收集的依赖 出现重复的现象
+      // 这个问题的解决放在cleanupDeps中进行
       this.cleanupDeps()
     }
     return value
@@ -127,10 +130,14 @@ export default class Watcher {
    */
   addDep (dep: Dep) {
     const id = dep.id
-    if (!this.newDepIds.has(id)) {
+    // 防止一次依赖收集中重复收集同一个依赖， 提供一个newDep来保存，
+    // 每次收集前都进行查重—— !this.newDepIds.has(id) ，同id的watcher就不会被重复收集
+    if (!this.newDepIds.has(id)) { 
       this.newDepIds.add(id)
       this.newDeps.push(dep)
-      if (!this.depIds.has(id)) {
+      // 在保证当前依赖收集过程中，同一依赖没重复收集的情况下，
+      // 如果老依赖中不存在这个依赖，那么就直接进行收集
+      if (!this.depIds.has(id)) { 
         dep.addSub(this)
       }
     }
@@ -140,6 +147,10 @@ export default class Watcher {
    * Clean up for dependency collection.
    */
   cleanupDeps () {
+    // 每次依赖收集完后，会将 newDepIds 和 newDeps 的内容替换给 depIds 和 deps 并清空
+    // cleanupDeps过程中，dep 代表的就是 上一次收集的依赖， newDep 代表的是这次收集的依赖
+    // 如果以前收集的依赖不存在于这次收集的依赖中，那么就将其删除（while循环的意义）
+    // 上述过程结束后，将这次收集的依赖保存在dep中，并清空newDep的内容，也就是回到了第一行所述的内容
     let i = this.deps.length
     while (i--) {
       const dep = this.deps[i]
@@ -147,6 +158,7 @@ export default class Watcher {
         dep.removeSub(this)
       }
     }
+    // 新依赖变为老依赖，情况之前的老依赖
     let tmp = this.depIds
     this.depIds = this.newDepIds
     this.newDepIds = tmp
